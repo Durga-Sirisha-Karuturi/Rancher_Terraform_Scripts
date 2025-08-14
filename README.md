@@ -48,9 +48,9 @@ vms – For custom clusters, a list of objects with ip and roles; for imported c
 Roles can be controlplane, etcd, worker, or a combination.  
 
 **Roles Reference**  
-controlplane – API server
-etcd – Kubernetes state storage  
-worker – Runs workloads
+- controlplane – API server
+- etcd – Kubernetes state storage  
+- worker – Runs workloads
 
 
 **🚀 Usage (Both Setups)**

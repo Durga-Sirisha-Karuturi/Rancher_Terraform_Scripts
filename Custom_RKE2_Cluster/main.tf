@@ -43,13 +43,17 @@ EOF
   }
 }
 
+
 locals {
+
   base_command = rancher2_cluster_v2.custom_cluster.cluster_registration_token.0.insecure_node_command
+
   role_flag_map = {
     controlplane = "--controlplane"
     etcd         = "--etcd"
     worker       = "--worker"
   }
+
   node_commands = {
     for idx, vm in var.vms :
     idx => join(" ", [
@@ -58,6 +62,7 @@ locals {
     ])
   }
 }
+
 
 # 2. SSH into each VM and run the command
 resource "null_resource" "register_nodes" {
@@ -69,9 +74,11 @@ resource "null_resource" "register_nodes" {
       <<-EOC
       if echo "${join(" ", each.value.roles)}" | grep -q "controlplane"; then
         echo '${var.ssh_password}' | sudo -S ln -sf /var/lib/rancher/rke2/bin/kubectl /usr/local/bin/kubectl
-        mkdir -p ~/.kube
-        echo '${var.ssh_password}' | sudo -S ln -sf /etc/rancher/rke2/rke2.yaml ~/.kube/config
-        echo 'export PATH=$PATH:/var/lib/rancher/rke2/bin/' >> ~/.bashrc
+        export PATH=$PWD/bin:$PATH
+        echo "export PATH=$PATH:/var/lib/rancher/rke2/bin" >> $HOME/.bashrc
+        echo "export KUBECONFIG=/etc/rancher/rke2/rke2.yaml"  >> $HOME/.bashrc
+        source ~/.bashrc
+
       fi
       EOC
     ]
@@ -89,4 +96,3 @@ output "base_registration_command" {
   value     = local.node_commands
   sensitive = true
 }
-
